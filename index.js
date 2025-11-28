@@ -12,6 +12,10 @@ app.get("/", (req, res) => {
   res.send("HEllO WORLD!");
 });
 
+// Create DB
+const moviesDB = client.db("moviesDB");
+const moviesCollection = moviesDB.collection("movies");
+
 const { MongoClient, ServerApiVersion } = require("mongodb");
 const uri = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.vn6lbjv.mongodb.net/?appName=Cluster0`;
 
@@ -26,6 +30,13 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     await client.connect();
+    //All movie data
+    app.get("/movies", async (req, res) => {
+      const cursor = moviesCollection.find();
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
     await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
