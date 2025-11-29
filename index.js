@@ -12,11 +12,9 @@ app.get("/", (req, res) => {
   res.send("HEllO WORLD!");
 });
 
-// Create DB
-const moviesDB = client.db("moviesDB");
-const moviesCollection = moviesDB.collection("movies");
+//#121422
 
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const uri = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.vn6lbjv.mongodb.net/?appName=Cluster0`;
 
 const client = new MongoClient(uri, {
@@ -30,10 +28,26 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     await client.connect();
+    //Created DB
+    const moviesDB = client.db("moviesDB");
+    const moviesCollection = moviesDB.collection("movies");
     //All movie data
     app.get("/movies", async (req, res) => {
       const cursor = moviesCollection.find();
       const result = await cursor.toArray();
+      res.send(result);
+    });
+    // Get top rated 5 movies
+    app.get("/movies/top-rated", async (req, res) => {
+      const cursor = moviesCollection.find().sort({ rating: -1 }).limit(5);
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+    // Get specific movie
+    app.get("/movie/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await moviesCollection.findOne(query);
       res.send(result);
     });
 
