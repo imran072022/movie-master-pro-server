@@ -88,11 +88,22 @@ async function run() {
       const result = await moviesCollection.updateOne(query, update, options);
       res.send(result);
     });
-
+    /*Latest movies/Recently added */
     app.get("/movies/latest", async (req, res) => {
       const cursor = moviesCollection.find().sort({ createdAt: -1 }).limit(6);
       const result = await cursor.toArray();
       res.send(result);
+    });
+
+    /*Get genres */
+    app.get("/movies/genres", async (req, res) => {
+      const projectField = { genre: 1 };
+      const genres = await moviesCollection
+        .find()
+        .project(projectField)
+        .toArray();
+      const uniqueGenres = [...new Set(genres.map((movie) => movie.genre))];
+      res.send(uniqueGenres);
     });
 
     await client.db("admin").command({ ping: 1 });
