@@ -59,7 +59,6 @@ async function run() {
     });
 
     /*Get user's own added movies */
-
     app.get("/movies/my-collection", async (req, res) => {
       const email = req.query.addedBy;
       const query = {};
@@ -87,6 +86,12 @@ async function run() {
       const update = { $set: updatedMovie };
       const options = {};
       const result = await moviesCollection.updateOne(query, update, options);
+      res.send(result);
+    });
+
+    app.get("/movies/latest", async (req, res) => {
+      const cursor = moviesCollection.find().sort({ createdAt: -1 }).limit(6);
+      const result = await cursor.toArray();
       res.send(result);
     });
 
