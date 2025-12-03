@@ -71,6 +71,25 @@ async function run() {
       res.send(result);
     });
 
+    /*Delete one movie */
+    app.delete("/movies/my-collection/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await moviesCollection.deleteOne(query);
+      res.send(result);
+    });
+
+    /*Send specific data to update */
+    app.patch("/movies/update/:id", async (req, res) => {
+      const id = req.params.id;
+      const updatedMovie = req.body;
+      const query = { _id: new ObjectId(id) };
+      const update = { $set: updatedMovie };
+      const options = {};
+      const result = await moviesCollection.updateOne(query, update, options);
+      res.send(result);
+    });
+
     await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
