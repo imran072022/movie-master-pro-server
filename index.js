@@ -58,6 +58,19 @@ async function run() {
       res.send(result);
     });
 
+    /*Get user's own added movies */
+
+    app.get("/movies/my-collection", async (req, res) => {
+      const email = req.query.addedBy;
+      const query = {};
+      if (email) {
+        query.addedBy = email;
+      }
+      const cursor = moviesCollection.find(query);
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
     await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
