@@ -125,6 +125,13 @@ async function run() {
       const result = await cursor.toArray();
       res.send(result);
     });
+    /*Delete api for watchlist */
+    app.delete("/movies/watchlist/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await watchListCollection.deleteOne(query);
+      res.send(result);
+    });
 
     await client.db("admin").command({ ping: 1 });
     console.log(
