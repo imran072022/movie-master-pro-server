@@ -31,6 +31,7 @@ async function run() {
     //Created DB
     const moviesDB = client.db("moviesDB");
     const moviesCollection = moviesDB.collection("movies");
+    const watchListCollection = moviesDB.collection("watchlist");
     //All movie data
     app.get("/movies", async (req, res) => {
       const cursor = moviesCollection.find();
@@ -104,6 +105,25 @@ async function run() {
         .toArray();
       const uniqueGenres = [...new Set(genres.map((movie) => movie.genre))];
       res.send(uniqueGenres);
+    });
+
+    /* Post watchlist api */
+    app.post("/movies/watchlist", async (req, res) => {
+      const watchlistedMovie = req.body;
+      const result = await watchListCollection.insertOne(watchlistedMovie);
+      res.send(result);
+    });
+
+    /*Get api for watchlist */
+    app.get("/movies/watchlist", async (req, res) => {
+      const email = req.query.email;
+      const query = {};
+      if (email) {
+        query.email = email;
+      }
+      const cursor = watchListCollection.find(query);
+      const result = await cursor.toArray();
+      res.send(result);
     });
 
     await client.db("admin").command({ ping: 1 });
