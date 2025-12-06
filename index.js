@@ -133,6 +133,52 @@ async function run() {
       res.send(result);
     });
 
+    /*Filter by genre and rating using mongodb's $in, $gte, $lte operators */
+    app.get("/movies/filter", async (req, res) => {
+      const { genres, minRating, maxRating } = req.query;
+      const query = {};
+      // Genre filter
+      if (genres) {
+        const genreArray = genres.split(",");
+        query.genre = { $in: genreArray };
+      }
+      // Rating filter
+      if (minRating && maxRating) {
+        // both min and max selected
+        query.rating = {
+          $gte: parseFloat(minRating),
+          $lte: parseFloat(maxRating),
+        };
+      } else if (minRating) {
+        query.rating = { $gte: parseFloat(minRating) };
+      } else if (maxRating) {
+        query.rating = { $lte: parseFloat(maxRating) };
+      }
+      // Sorting logic
+      let sort = {};
+      if (minRating && !maxRating) sort.rating = 1;
+      else if (maxRating && !minRating) sort.rating = -1;
+
+      /*practicing try catch in backend */
+      try {
+        const cursor = moviesCollection
+          .find(query)
+          .project({
+            title: 1,
+            rating: 1,
+            posterUrl: 1,
+            genre: 1,
+            releaseYear: 1,
+          })
+          .sort(sort);
+        const result = await cursor.toArray();
+        res.send(result);
+      } catch (error) {
+        console.error(error);
+        res.status(500).send({ error: "Failed to fetch filtered movies" });
+      }
+    });
+
     await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
